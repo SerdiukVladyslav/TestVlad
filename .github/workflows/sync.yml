@@ -1,0 +1,37 @@
+name: Sync with Other Repos
+
+on:
+  push:
+    branches:
+      - master
+     
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+     
+
+      
+      - name: Push to Other Repositories
+        run: |
+          git config --global user.email "lev.pavelko.studies@gmail.com"
+          git config --global user.name "LevPavelko"
+          git remote add peer git@github.com:SerdiukVladyslav/TestVlad.git || true
+          git fetch peer
+          # Переключитесь на локальную ветку master
+          git checkout master
+          # Слияние изменений из удаленной ветки main
+          git pull peer main --rebase
+          # Отправка изменений в удаленную ветку main
+          git push peer master:main
+         
